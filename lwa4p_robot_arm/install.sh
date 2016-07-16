@@ -4,6 +4,21 @@
 # ROS-Indigo (the most recent update)
 # SocketCAN(ESD CAN card (PLX90xx), sja1000 kernel driver)
 
+get_sudo() {
+    uid="$(id -u)"
+    SUDO="sudo"
+    if [[ $uid -eq 0 ]]
+    then
+        SUDO=""
+    fi
+}
+
+get_sudo
+
+# Initialize rosdep
+$SUDO rosdep init
+rosdep update
+
 # prepare catkin workspace
 mkdir -p $HOME/catkin_ws/src
 cd $HOME/catkin_ws/src
@@ -18,7 +33,7 @@ rosdep install --from-paths src --ignore-src --rosdistro indigo -y
 
 # build catkin workspace
 source /opt/ros/indigo/setup.bash
-catkin_make | tee catkin.log
+catkin_make
 echo "source $HOME/catkin_ws/devel/setup.bash" >> $HOME/.bashrc
 source $HOME/catkin_ws/devel/setup.bash
 
@@ -36,15 +51,9 @@ echo ">> Current directory: $(pwd)"
 rosdep install --from-paths src --ignore-src --rosdistro indigo -y
 
 # build moveit workspace
-catkin_make | tee catkin_make.log
+catkin_make
 echo "source $HOME/moveit/devel/setup.bash" >> $HOME/.bashrc
 source $HOME/moveit/devel/setup.bash
-
-# prepare can0
-ip link set dev can0 down
-ip link set can0 type can bitrate 500000
-ip link set dev can0 up
-ifconfig can0 txqueuelen 20
 
 echo "Installation done successfully."
 
